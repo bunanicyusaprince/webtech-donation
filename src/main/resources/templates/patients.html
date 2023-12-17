@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin-patients</title>
+</head>
+<body>
+    <section id="bodyWrapper">
+        <div th:replace="~{sidebar}"></div>
+        <div th:replace="~{header}"></div>
+        <div class="contents">
+            <div class="form">
+                <h3>Manage Patients</h3>
+                <form th:action="@{addPatient}" method="post" id="form" th:object="${patientModel}" enctype="multipart/form-data">
+                    <input type="hidden" id="patientId" th:field="*{id}">
+                    <div class="form-input">
+                        <label for="names">Names:</label><input type="text" id="names" th:field="*{names}" required>
+                        <small th:if="${#fields.hasErrors('names')}" th:errors="*{names}" style="color: #bd1d1d;">names error</small>
+                    </div>
+                    <div class="form-input">
+                        <label for="location">Location:</label><input type="text" id="location" th:field="*{location}" required>
+                        <small th:if="${#fields.hasErrors('location')}" th:errors="*{location}" style="color: #bd1d1d;">location error</small>
+                    </div>
+                    <div class="form-input">
+                        <label for="sickness">Sickness:</label><input type="text" id="sickness" th:field="*{sickness}" required>
+                        <small th:if="${#fields.hasErrors('sickness')}" th:errors="*{sickness}" style="color: #bd1d1d;">sickness error</small>
+                    </div>
+                    <div class="form-input">
+                        <label for="treatment">Treatment:</label><input type="text" id="treatment" th:field="*{treatment}" required>
+                        <small th:if="${#fields.hasErrors('treatment')}" th:errors="*{treatment}" style="color: #bd1d1d;">treatment error</small>
+                    </div>
+                    <div class="form-input">
+                        <label for="amount">Amount:</label><input type="number" id="amount" th:field="*{amount}" required>
+                        <small th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" style="color: #bd1d1d;">Email error</small>
+                    </div>
+                    <div class="form-input">
+                        <label for="description">Description:</label><textarea placeholder="description" id="description" cols="30" rows="3" th:field="*{description}"></textarea>
+                        <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}" style="color: #bd1d1d;">Email error</small>
+                    </div>
+                    <input type="submit" value="Submit" id="formBtn" name="action">
+                </form>
+            </div>
+
+
+            <div class="display">
+                <div class="search">
+                    <h3>Patients you got</h3>
+                    <form th:action="@{patients}">
+                        <label for="search-input"></label><input type="search" id="search-input" name="search" placeholder="Search...">
+                    </form>
+            </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="display: none;">id</th>
+                        <th>Names</th>
+                        <th>Location</th>
+                        <th>Sickness</th>
+                        <th>Treatments</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="pt: ${patientPage}">
+                        <td th:text="${pt.id}" style="display: none;"></td>
+                        <td><div class="pt-image"><div class="img">&image;</div><span th:text="${pt.names}"></span></div></td>
+                        <td th:text="${pt.location}"></td>
+                        <td th:text="${pt.sickness}"></td>
+                        <td th:text="${pt.treatment}"></td>
+                        <td th:text="${pt.amount}"></td>
+                        <td th:text="${pt.description}"></td>
+                        <td><div class="action">
+                            <button class="updateBtn">@</button>
+                            <button class="deleteBtn">x</button></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${patientPage.totalPages > 0}" class="pagination" th:each="pageNumber : ${pageNumbers}">
+                    <a th:href="@{patients(size=${patientPage.size}, page=${pageNumber})}"
+                       th:text="${pageNumber}"
+                       th:class="${pageNumber==patientPage.number + 1} ? active"></a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</body>
+</html>
+
+<script defer>
+    const form = document.getElementById('form');
+    const patientId = document.getElementById('patientId');
+    const namesFld = document.getElementById('names');
+    const locationFld = document.getElementById('location');
+    const sicknessFld = document.getElementById('sickness');
+    const treatmentFld = document.getElementById('treatment');
+    const amountFld = document.getElementById('amount');
+    const descriptionFld = document.getElementById('description');
+    const formBtn = document.getElementById('formBtn');
+    const updateBtn = document.querySelectorAll('.updateBtn');
+    const deleteBtn = document.querySelectorAll('.deleteBtn');
+
+    updateBtn.forEach(button => {
+        button.addEventListener('click', () => {
+            const row = button.closest('tr');
+            const field = row.getElementsByTagName('td');
+
+            patientId.value = field[0].textContent;
+            namesFld.value = field[1].textContent;
+            locationFld.value = field[2].textContent;
+            sicknessFld.value = field[3].textContent;
+            treatmentFld.value = field[4].textContent;
+            amountFld.value = field[5].textContent;
+            descriptionFld.value = field[6].textContent;
+            formBtn.value = 'Update';
+        });
+    });
+
+    deleteBtn.forEach(button => {
+        button.addEventListener('click', () => {
+            const row = button.closest('tr');
+            const field = row.getElementsByTagName('td');
+
+            patientId.value = field[0].textContent;
+            namesFld.value = field[1].textContent;
+            locationFld.value = field[2].textContent;
+            sicknessFld.value = field[3].textContent;
+            treatmentFld.value = field[4].textContent;
+            amountFld.value = field[5].textContent;
+            descriptionFld.value = field[6].textContent;
+            formBtn.value = 'Delete'
+        });
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        form.action = "/admin/addPatient?action=" + formBtn.value;
+        form.submit();
+    });
+</script>
